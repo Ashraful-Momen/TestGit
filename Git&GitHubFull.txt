@@ -164,5 +164,10 @@ git push -u origin main
 git remote add origin https://github.com/Ashraful-Momen/TestGit.git    | [link off line folder to online folder]
 git branch -M main   [change/migrate the branch name 'master' to 'main']
 git push -u origin main [upload to file]
+
+
+if want to push another branch => 
+---------------------------------
+>>> git push -u origin branch_name
 ---------------------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------------------
