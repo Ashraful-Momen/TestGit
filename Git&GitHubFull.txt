@@ -190,3 +190,10 @@ basically pull reqeust merge with other branch in github ... and spach commit (m
 >>> then pull request merge one to other branch 
 >>> for update github commit after pull reqeust(merge with other branch )
 >>> git pull (update offline git )
+
+-----------------------------------------git Forking-----------------------------------
+#git forking => clone a repository from other github profile into my github profile . 
+
+> then git clone to my dektop 
+> then commit afeter completing task 
+> then push to my github repo 
