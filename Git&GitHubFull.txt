@@ -197,3 +197,7 @@ basically pull reqeust merge with other branch in github ... and spach commit (m
 > then git clone to my dektop 
 > then commit afeter completing task 
 > then push to my github repo 
+
+now want to contribute my task to other repo > then create a pull requst > select the repository other where I contribute my task
+>>> when create pull requst for contribute to others then >>> select the repo and branch , then select my repo (where I complete task for contribut ) and select my branch , then commit to create a pull requst .
+>>> when owner of the repo accept my request commit will create auto ....
