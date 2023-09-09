@@ -185,3 +185,4 @@ if other person chagne code and commit in colleborate branch to get this update 
 -------------------------------------------------------------------------------------------------------------
 -------------------------------------git pull request(github)------------------------------------------------------------------------
 
+basically pull reqeust merge with other branch in github ... and spach commit (more commit make 1 commit ...)
