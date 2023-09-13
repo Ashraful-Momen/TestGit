@@ -204,3 +204,5 @@ now want to contribute my task to other repo > then create a pull requst > selec
 ------------------------------------------git Read.md(mark down)-------------------------------------
 this is a github template ... write down about github repo in read.me... and there are some of rulse 
 to write the details in readme.md ....
+------------------------------------------download with branch repo------------------------------
+>>> git pull remote_repo Branch
