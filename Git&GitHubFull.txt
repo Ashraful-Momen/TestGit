@@ -209,3 +209,5 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 
 ------------------------------------------download with branch repo------------------------------
 >>> git pull remote_repo Branch
+------------------------------------------goto back commit 1 step--------------------------------
+>>> git reset --hard HEAD~1
