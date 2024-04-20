@@ -97,7 +97,14 @@ show the branch:
 -----------------------------------
 >>> git checkout -b branchAnyName  | when create new branch , previous branch will be parent branch for new branch , and new branch inherit all propertys from parent branch... after merging
 -------------------------------------
+***show the all branch=> 
+-------------------------
+>>> git branch -a 
 
+***show the more about branch
+-------------------------------------
+>>> git branch -v
+-------------------------------------
 
 -------------------------------------
 ***switch 1 branch to another branch ->
