@@ -33,6 +33,11 @@
 >>>git config --global user.email "you@example.com"
 >>>git config --global user.name "Your Name"
 ----------------------------
+============================================
+#check the git config: 
+----------------------
+>>> git config check -list
+============================================
 //single line commit=> 
 -----------------------
 >>> git commit -m 'first commit '  [-m means (msg)]
@@ -218,3 +223,7 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 >>> git pull remote_repo Branch
 ------------------------------------------goto back commit 1 step--------------------------------
 >>> git reset --hard HEAD~1
+------------------------------------------git pull requst : (head)dev1 branch to (base)main branch-------------------------------
+>>> gh pr create --base main --head dev1 --title "Title of your PR" --body "Description of your PR"
+
+
