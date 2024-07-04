@@ -244,5 +244,7 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 >>> git reset --hard HEAD~1
 ------------------------------------------git pull requst : (head)dev1 branch to (base)main branch-------------------------------
 >>> gh pr create --base main --head dev1 --title "Title of your PR" --body "Description of your PR"
+----------------------------------If remove all code momen branch and replace code from hello branch -----------------------------
+>>> git reset --hard hello  // this line remove all code from momen branch and replace all code from hello branch  
 
 
