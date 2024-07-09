@@ -250,4 +250,8 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 #after code replace run the command for update all commit for momen branch : 
 >>> git push --set-upstream origin momen
 
+------------------------------------------------show the git commit : pretty format-------------------------------------
+>>> git log --pretty=format:"%h - %an, %ar : %s"
+
+
 
