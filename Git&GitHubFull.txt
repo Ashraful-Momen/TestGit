@@ -253,5 +253,11 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 ------------------------------------------------show the git commit : pretty format-------------------------------------
 >>> git log --pretty=format:"%h - %an, %ar : %s"
 
+------------------------------------------------new folder pull the git project --------------------------------------
+#main branch get auto but other branch have to fetch menually : 
+>>> git fetch origin momen
+#create and swith new branch : 
+>>> git checkout -b momen origin/momen
+
 
 
