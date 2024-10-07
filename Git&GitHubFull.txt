@@ -259,6 +259,12 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 >>> git fetch origin momen
 #create and swith new branch : 
 >>> git checkout -b momen origin/momen
+-----------------------------------------------show the current branch-----------------------------------------
+>>>git branch --show-current
+--------------------------------------------**** suppose I do some task on momen branch , in that time other persone said to merge. Need to save current brach task with >>> git stash , then merge with other branch . 
+and after merge pull code from git memory use >>> git stash pop. 
+#copy current task to git memory : >>> git stash 
+#paste 'git stash tash to branch again ' >>> git stash pop
 
 
 
