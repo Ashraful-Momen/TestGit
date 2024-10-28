@@ -119,6 +119,8 @@ show the branch:
 if we switch child (feature) branch to parent(master) branch then child(feature) previous task will remove ... 
 again if we switch 
 ----------------------------------------------Git merge Main part: -----------------------------------------------------------
+Before merge must be pull the latest code . then solve the conflict (accept incoming | accept current | accept both) either getting fast-forward error . 
+
 question=> there are 2 branch in git 1. momen 2.momen-dev. all update code in momen branch now I want to update all momen to momen-dev . how can I do that ?
 
 
@@ -128,16 +130,16 @@ To update the momen-dev branch with all the updates from the momen branch, you c
 
  
 
->>> git checkout momen-dev
+>>> git checkout momen-dev   | >>> git switch momen-dev
 
 Merge the momen branch into momen-dev:
 
->>> git merge momen
+>>> git merge origin momen
 
 This will incorporate all the changes from the momen branch into the momen-dev branch.
 
 #after merge momen -> momen-dev all code then run the command 
->>> git push momen-dev | this command update all commit into momen-dev
+>>> git push origin momen-dev | this command update all commit into momen-dev
 ---------------------------------------------------------------------------------------------------------
 --------------------------------------------Visualizing Merge-------------------------------------------------------------
 Fast-Forwading- Merging.=> [after master branch work , switch new featuer branch ... then complete task / commit , then switch master branch and marge with feature branch, ***in that time master branch has no more commit change . then we success fully to do merging]
