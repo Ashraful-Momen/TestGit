@@ -1,0 +1,55 @@
+┌──(ashraful㉿kali)-[~/…/Git-Ashraful/pull form git/git pull - 13-07-24/instasure-microsite-main]
+└─$ git push --set-upstream origin momen-dev
+To http://192.168.3.99/ashraful/instasure-microsite-main.git
+ ! [rejected]          momen-dev -> momen-dev (non-fast-forward)
+error: failed to push some refs to 'http://192.168.3.99/ashraful/instasure-microsite-main.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+================================= sovle ========================================
+
+The error you are seeing, non-fast-forward, indicates that the remote branch momen-dev has changes that you don't have locally. To resolve this, you need to pull the changes from the remote branch before you can push your changes. Here’s what you can do:
+1. Pull Changes from the Remote Branch
+
+bash
+
+git pull origin momen-dev
+
+This command will merge the changes from the remote branch momen-dev into your local momen-dev.
+
+-------------> optional task!
+
+2. Handle Merge Conflicts (If Any)
+
+If there are conflicts during the merge, Git will pause and prompt you to resolve them. Open the conflicting files, make the necessary adjustments, and then mark them as resolved:
+
+bash
+
+git add <file_name>
+
+After resolving conflicts:
+
+bash
+
+git commit
+
+3. Push Your Changes
+
+After successfully pulling and resolving any conflicts, you can push your changes:
+
+bash
+
+git push --set-upstream origin momen-dev
+
+Alternative: Force Push (Use with Caution)
+
+If you are sure that you want to overwrite the remote branch with your local changes (this will discard remote changes), you can use a force push:
+
+bash
+
+git push --force origin momen-dev
+
+Note: Be careful with force push as it will overwrite the remote branch, potentially deleting others' changes.
+================================================================================
