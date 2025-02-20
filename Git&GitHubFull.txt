@@ -225,15 +225,36 @@ basically pull reqeust merge with other branch in github ... and spach commit (m
 >>> git pull (update offline git )
 
 -----------------------------------------git Forking-----------------------------------
+
 #git forking => clone a repository from other github profile into my github profile . 
 
-> then git clone to my dektop 
-> then commit afeter completing task 
-> then push to my github repo 
+# fork : clone other git_repo to my github account 
+-----------
+goto any 'A' git profile 
+select any repo which I contribute my work (click fork)
+when click fork 'A/contribute_repo' clone to my personal account . 
+after modify the code then push my personal account . 
+----------------------------------------------------
 
-now want to contribute my task to other repo > then create a pull requst > select the repository other where I contribute my task
->>> when create pull requst for contribute to others then >>> select the repo and branch , then select my repo (where I complete task for contribut ) and select my branch , then commit to create a pull requst .
->>> when owner of the repo accept my request commit will create auto ....
+#Request for Contribution: 
+---------------------------
+#goto git personal profile 'B'. 
+#goto to pull request . 
+
+options => 
+-------------
+"""
+option 1 : select_git_A_profile/repo/ [where I want to contribute ] | option 2: select 'A' branch | option 3: select my person 'B' profile [where I modify those code for contribute] | option 4:  and select 'B' banch where code. 
+--------------------------------------------------
+# Git profile A : accept the pull request (merge those code) then | B profile show in contribute list . 
+
+#merge command : 
+-----------------
+>>> git checkout A/main  # or the branch where you want to merge
+>>> git pull origin pull/<PR_number>/merge  # pull the PR changes
+>>> git push origin A/main  # push the merged changes back to the repository
+
+"""
 ------------------------------------------git Read.md(mark down)-------------------------------------
 this is a github template ... write down about github repo in read.me... and there are some of rulse 
 to write the details in readme.md ....
