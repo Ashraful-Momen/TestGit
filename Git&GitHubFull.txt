@@ -226,6 +226,64 @@ basically pull reqeust merge with other branch in github ... and spach commit (m
 
 -----------------------------------------git Forking-----------------------------------
 
+┌───────────────────────┐         fork          ┌───────────────────────┐
+│ Image-slider repo     │ ────────────────────► │ Image-slider repo     │
+│ Roni(A) GitHub Profile│                       │shuvo(B) GitHub Profile│
+└───────────────────────┘                       └───────────────────────┘
+        ▲                                               │
+        │                                               │ clone
+        │                                     ┌─────────────────────────────┐
+        │                                     │ Image-slider repo           │
+        │                                     │ shuvo (B) local git repo    │
+        │                                     └─────────────────────────────┘
+        │                                               │
+        │                                  make changes │
+        │                                               ▼
+        │                                     ┌──────────────────────┐
+        │                                     │ Changes & Commit     │
+        │                                     │ Local Git Repo       │
+        │                                     └──────────────────────┘
+        │                                               │
+        │                                     push changes │
+        │                                               │
+        │                                               ▼
+        ◄────────────────────── pull request ────────────┘
+
+--------------- Forking Part 1 -------------------------------------------------------------------
+1️⃣ Go to any GitHub profile (Example: Profile 'A').
+2️⃣ Select a repository where you want to contribute.
+3️⃣ Click the **Fork** button on that repository.
+
+➡ This action copies the repository (Example: A/contribute_repo) into your GitHub account (Profile 'B').
+
+4️⃣ Clone your forked repository (now under your GitHub profile) into your local machine:
+$ git clone https://github.com/B/contribute_repo.git
+
+5️⃣ Make your changes locally.
+6️⃣ Commit the changes:
+$ git add .
+$ git commit -m "Your commit message"
+
+7️⃣ Push the changes to your GitHub repository:
+$ git push origin branch_name
+
+--------------- Forking Part 2: Pull Request -------------------------------------------------------
+
+1️⃣ Go to your GitHub Profile 'B'.
+2️⃣ Open the forked repository.
+3️⃣ Click on **Pull Request** (Request to merge your changes into original repo).
+
+You’ll get these options:
+-----------------------------------
+Option 1: Select Original Repo (Profile 'A') where you want to contribute.  
+Option 2: Select the branch of Profile 'A' (usually 'main' or 'master').  
+Option 3: Select your forked repo (Profile 'B') where you made changes.  
+Option 4: Select the branch of Profile 'B' where you committed the changes.
+-----------------------------------
+
+
+
+------------------------------------My Previous Note for GitHub Forking------------------------------------------------------------
 #git forking => clone a repository from other github profile into my github profile . 
 
 # fork : clone other git_repo to my github account 
@@ -247,6 +305,10 @@ options =>
 option 1 : select_git_A_profile/repo/ [where I want to contribute ] | option 2: select 'A' branch | option 3: select my person 'B' profile [where I modify those code for contribute] | option 4:  and select 'B' banch where code. 
 --------------------------------------------------
 # Git profile A : accept the pull request (merge those code) then | B profile show in contribute list . 
+
+
+-------------------------------- End Previous Forking Note --------------------------
+
 
 #merge command : 
 -----------------
