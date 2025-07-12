@@ -281,7 +281,9 @@ Option 3: Select your forked repo (Profile 'B') where you made changes.
 Option 4: Select the branch of Profile 'B' where you committed the changes.
 -----------------------------------
 
+✅ Once submitted, GitHub Profile 'A' will review your Pull Request.
 
+✅ If accepted (merged), your contribution will be included in the main project, and your profile ('B') will appear in the Contributors list.
 
 ------------------------------------My Previous Note for GitHub Forking------------------------------------------------------------
 #git forking => clone a repository from other github profile into my github profile . 
