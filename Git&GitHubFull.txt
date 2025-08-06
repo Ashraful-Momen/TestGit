@@ -464,4 +464,5 @@ and after merge pull code from git memory use >>> git stash pop.
 #paste 'git stash tash to branch again ' >>> git stash pop
 
 
-
+-----------------------------------------------Change the git remote url-----------------------------------------
+>>> git remote set-url origin http://119.148.19.197/ashraful/instasure-microsite-main.git
