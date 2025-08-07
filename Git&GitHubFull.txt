@@ -466,3 +466,27 @@ and after merge pull code from git memory use >>> git stash pop.
 
 -----------------------------------------------Change the git remote url-----------------------------------------
 >>> git remote set-url origin http://119.148.19.197/ashraful/instasure-microsite-main.git
+
+
+--------------------------------------------- add file / folder in -->.gitignore file ---------------------------------------
+
+
+.env   <- file 
+/vendor <- folder
+/AllApiDocumentationForDeveloper/  <-folder
+/node_modules
+/ThunderClientApiBackup/
+/TaskSchedulingFile/
+
+
+
+
+-------------------------------------------- Remove git Cache : after add file/folder in .gitIgnore (after push still get)------------------------------------------
+
+git rm --cached .env
+git rm --cached -r AllApiDocumentationForDeveloper/
+git rm --cached -r ThunderClientApiBackup/
+git rm --cached -r vendor/
+git rm --cached -r node_modules/
+git rm --cached -r TaskSchedulingFile/
+
