@@ -483,10 +483,14 @@ and after merge pull code from git memory use >>> git stash pop.
 
 -------------------------------------------- Remove git Cache : after add file/folder in .gitIgnore (after push still get)------------------------------------------
 
-git rm --cached .env
-git rm --cached -r AllApiDocumentationForDeveloper/
-git rm --cached -r ThunderClientApiBackup/
-git rm --cached -r vendor/
-git rm --cached -r node_modules/
-git rm --cached -r TaskSchedulingFile/
+>>>git rm --cached .env
+>>>git rm --cached -r AllApiDocumentationForDeveloper/
+>>>git rm --cached -r ThunderClientApiBackup/
+>>>git rm --cached -r vendor/
+>>>git rm --cached -r node_modules/
+>>>git rm --cached -r TaskSchedulingFile/
 
+#delete all cache from git : 
+------------------------------
+
+>>> git rm -r --cached . && git add . && git commit -m "Rebuild git cache with .gitignore"
