@@ -53,3 +53,12 @@ git push --force origin momen-dev
 
 Note: Be careful with force push as it will overwrite the remote branch, potentially deleting others' changes.
 ================================================================================
+
+ashraful@instasure-dns-vm-06:~/gitlab_project/instasure-dockerized$ git add . 
+fatal: detected dubious ownership in repository at '/home/ashraful/gitlab_project/instasure-dockerized'
+To add an exception for this directory, call:
+        git config --global --add safe.directory /home/ashraful/gitlab_project/instasure-dockerized
+
+>>> git config --global --add safe.directory /home/ashraful/gitlab_project/instasure-dockerized
+
+>>> git push origin laravel_docker_v2 --force
