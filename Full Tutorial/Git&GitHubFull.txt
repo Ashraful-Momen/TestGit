@@ -439,6 +439,9 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 >>> git pull remote_repo Branch
 ------------------------------------------goto back commit 1 step--------------------------------
 >>> git reset --hard HEAD~1
+
+------------------------------------------ if back previous stage codes (still now not commit )---------------------------------
+>>> git clean -fd
 ------------------------------------------git pull requst : (head)dev1 branch to (base)main branch-------------------------------
 >>> gh pr create --base main --head dev1 --title "Title of your PR" --body "Description of your PR"
 ----------------------------------If remove all code momen branch and replace code from hello branch -----------------------------
