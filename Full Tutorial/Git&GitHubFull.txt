@@ -465,8 +465,11 @@ if can't push to github repo => git pull origin main --allow-unrelated-histories
 and after merge pull code from git memory use >>> git stash pop. 
 #copy current task to git memory : >>> git stash 
 #paste 'git stash tash to branch again ' >>> git stash pop
-
-
+------------------------------------ Fix the error : refusing to merge unrelated histories --------------------------------------------
+>>> git merge origin/alim-dev --allow-unrelated-histories
+>>> git add . 
+>>> git commit -m " .... " 
+>>> git push origin ashraful
 -----------------------------------------------Change the git remote url-----------------------------------------
 >>> git remote set-url origin http://119.148.19.197/ashraful/instasure-microsite-main.git
 
