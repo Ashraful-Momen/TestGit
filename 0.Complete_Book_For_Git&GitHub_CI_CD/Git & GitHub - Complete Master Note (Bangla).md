@@ -1,0 +1,1389 @@
+# 📘 Git & GitHub — সম্পূর্ণ মাস্টার নোট (বাংলা)
+
+> **এই নোটে যা যা আছে:**
+>
+> | পার্ট | টপিক |
+> | ----- | ---- |
+> | ১ | Git বেসিক — কনসেপ্ট, ইনস্টল, init/add/commit/log, `.gitignore` |
+> | ২ | GitHub-এ রিপো তৈরি, push/pull/clone |
+> | ৩ | Branch — তৈরি, সুইচ, ডিলিট, দেখা |
+> | ৪ | Merge + **Merge Conflict সমাধান** (Fast-forward ও Merge Commit) |
+> | ৫ | **Forking** ও Pull Request (ওপেন সোর্স কন্ট্রিবিউশন) |
+> | ৬ | Team Collaboration + Branch Protection Rule |
+> | ৭ | **SSH কী সেটআপ** (নিজের PC-র স্থায়ী সেটআপ) |
+> | ৮ | **অন্য PC-তে সাময়িক Git ব্যবহার + ক্রেডেনশিয়াল রিমুভ** (PAT/SSH/gh CLI) |
+> | ৯ | **CI/CD-র জন্য Token দিয়ে সাময়িক ব্যবহার** (সম্পূর্ণ ওয়ার্কফ্লো) |
+> | ১০ | জরুরি টুলস — stash, reset, clean, fetch, কমন error ফিক্স |
+> | ১১ | Master Cheat Sheet (সব কমান্ড এক জায়গায়) |
+
+---
+---
+
+# 🌱 পার্ট ১: Git বেসিক
+
+## 🧠 Git কী ও মূল কনসেপ্ট
+
+Web App-এর **ভার্সন কন্ট্রোল**ের জন্য আমরা Git ব্যবহার করি। Linux-এ snapshot ব্যবহার করে সিস্টেমের বিভিন্ন স্টেজে যাওয়া-আসা করা যায় — Git-ও ঠিক তেমনি কাজ করে।
+
+- **commit** = কোড পরিবর্তনের পর সেটা সেভ করা (কমান্ডের সাথে মেসেজ থাকে)। **১টা commit = ১টা snapshot/stage**
+- **checkpoint** = প্রতিটা commit-এর পর একটা নতুন checkpoint তৈরি হয়। চাইলে আমরা পুরনো/নতুন যেকোনো ভার্সনে **ফিরে যেতে বা আগে যেতে** পারি
+- **HEAD** = একটা পয়েন্টার, যা সবসময় **শেষ commit-এর পজিশন** নির্দেশ করে
+- commit-গুলো চেইনের মতো থাকে: ২য় commit-এর parent হলো ১ম commit (hash_id দিয়ে সম্পর্ক), ৩য় commit-এর parent হলো ২য় commit
+
+## 📥 Git ইনস্টল
+
+- Official সাইট থেকে ডাউনলোড করে **ডিফল্ট সেটিংস** দিয়ে ইনস্টল করলেই হয়
+
+## 🚀 শুরু করা — init, status, add, commit, log
+
+### ফোল্ডারকে Git রিপোজিটরি বানানো:
+
+```bash
+git init
+```
+
+### রিপোর সব তথ্য দেখা (status, commit, branch, stage — সব):
+
+```bash
+git status
+```
+
+### ফাইল/ফোল্ডার track করা (stage করা):
+
+```bash
+git add fileName/FolderName   # নির্দিষ্ট ফাইল/ফোল্ডার
+git add .                     # বর্তমান ফোল্ডারের সব ফাইল/ফোল্ডার
+```
+
+> ⚠️ **নিয়ম:** commit করার আগে অবশ্যই `git add` করতে হবে → তারপর `git commit -m "..."`
+
+### ফাইল untrack করা (git-এর নজর থেকে সরানো, ফাইল ডিলিট হয় না):
+
+```bash
+git rm --cached gitText.txt
+```
+
+### Commit করার আগে প্রথমবার নাম-ইমেইল সেট করতে হয়:
+
+```bash
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
+# কনফিগ চেক করো:
+git config --list
+```
+
+### Commit করা:
+
+```bash
+# এক লাইনের মেসেজ (সবচেয়ে বেশি ব্যবহৃত) — -m মানে message
+git commit -m 'first commit'
+
+# মাল্টি-লাইন মেসেজ (এডিটর খুলবে)
+git commit
+```
+
+### সব commit দেখা:
+
+```bash
+git log                  # বিস্তারিত
+git log --oneline        # এক লাইনে সংক্ষেপে
+
+# আরও সুন্দর ফরম্যাটে (hash - author, time : message):
+git log --pretty=format:"%h - %an, %ar : %s"
+```
+
+## 📊 VS Code-এ Git Graph (ভিজ্যুয়ালি commit দেখা)
+
+1. VS Code Extension-এ **Git Graph** প্যাকেজ ইনস্টল করো
+2. `Ctrl+Shift+P` চাপো
+3. সার্চ করো → **Git Graph Views** → ক্লিক করো
+4. যেকোনো commit-এ ক্লিক করলে commit-এর ডিটেইলস দেখা যাবে — **bug খোঁজার জন্য দারুণ কাজে লাগে**
+
+## 🙈 `.gitignore` — ফাইল/ফোল্ডার Git-এর নজরে না আনা
+
+`.gitignore` নামে ফাইল বানিয়ে ভেতরে লিখে দাও কোন কোন ফাইল/ফোল্ডার ignore করবে। এরপর `git add .` করলেও এগুলো যাবে না:
+
+```gitignore
+fileName.txt              # নির্দিষ্ট ফাইল
+folderName/               # পুরো ফোল্ডার
+.env                      # এনভায়রনমেন্ট ফাইল (সিক্রেট থাকে)
+/vendor                   # ফোল্ডার
+/node_modules
+/AllApiDocumentationForDeveloper/
+/ThunderClientApiBackup/
+/TaskSchedulingFile/
+```
+
+**রেডিমেড `.gitignore` পাওয়ার সাইট:**
+
+👉 https://www.toptal.com/developers/gitignore/
+
+সার্চ বক্সে `django` / `react` / `node` ইত্যাদি লিখলে ওই প্রজেক্টের জন্য রেডি `.gitignore` ফাইল দিয়ে দেয় — রিপো ছোট থাকে।
+
+### ⚠️ `.gitignore`-এ যোগ করার পরও যদি push হতে থাকে (cache পরিষ্কার):
+
+আগে থেকেই track হয়ে যাওয়া ফাইল `.gitignore`-এ লিখলেও Git মনে রাখে (cache)। তখন:
+
+```bash
+# নির্দিষ্ট ফাইল/ফোল্ডার cache থেকে বাদ দাও
+git rm --cached .env
+git rm --cached -r vendor/
+git rm --cached -r node_modules/
+git rm --cached -r AllApiDocumentationForDeveloper/
+git rm --cached -r ThunderClientApiBackup/
+git rm --cached -r TaskSchedulingFile/
+
+# অথবা পুরো cache রিসেট করে নতুন করে বানাও:
+git rm -r --cached . && git add . && git commit -m "Rebuild git cache with .gitignore"
+```
+
+---
+---
+
+# ☁️ পার্ট ২: GitHub-এ রিপো তৈরি ও push / pull / clone
+
+## 🆕 নতুন রিপো বানিয়ে প্রথমবার push করা
+
+GitHub-এ নতুন রিপো বানালে এই কমান্ডগুলো দেখায় (offline ফোল্ডারকে online-এ আনা):
+
+```bash
+echo "# TestGit" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Ashraful-Momen/TestGit.git
+git push -u origin main
+```
+
+## 🔄 একটিভ (existing) লোকাল রিপো push করা
+
+```bash
+git remote add origin https://github.com/Ashraful-Momen/TestGit.git
+# [offline ফোল্ডারকে online ফোল্ডারের সাথে লিংক করা]
+
+git branch -M main
+# [master নাম বদলে main করা]
+
+git push -u origin main
+# [ফাইল আপলোড]
+```
+
+**অন্য কোনো branch push করতে চাইলে:**
+
+```bash
+git push -u origin branch_name
+```
+
+## ⬇️ GitHub থেকে ডাউনলোড (clone)
+
+```bash
+git clone https://github.com/username/repo.git
+```
+
+## 📥 git pull — অন্যের করা আপডেট নিজের PC-তে আনা
+
+টিমের কেউ কোড পরিবর্তন করে push করলে, সেই আপডেট তোমার PC-এ আনতে:
+
+```bash
+git pull
+# online-এর commit → offline git-এ চলে আসে
+```
+
+**Pull Request merge হওয়ার পরও** নিজের লোকাল রিপো আপডেট করতে `git pull` চালাও।
+
+## 📝 README.md (Markdown)
+
+GitHub-এর টেমপ্লেট ফাইল — রিপো সম্পর্কে বিস্তারিত এখানে লেখা হয়। লেখার নিয়মকানুন (Markdown rules) মেনে সুন্দর করে সাজানো যায়।
+
+## 🔗 Remote URL বদলানো
+
+```bash
+git remote set-url origin http://119.148.19.197/ashraful/instasure-microsite-main.git
+
+# বর্তমান remote দেখতে:
+git remote -v
+```
+
+---
+---
+
+# 🌿 পার্ট ৩: Branch — তৈরি, সুইচ, ডিলিট, দেখা
+
+## 🧠 Branch কনসেপ্ট
+
+Branch গাছের মতো কাজ করে — `main/master` থেকে সাব-branch তৈরি হয়। টিমের একাধিক প্রোগ্রামার আলাদা আলাদা branch-এ অ্যাপের আলাদা অংশ ডেভেলপ করে (একজন homepage, একজন contact page, একজন অন্য ফিচার...)।
+
+**গুরুত্বপূর্ণ:** নতুন branch তৈরি করলে তার **parent branch-এর সব প্রপার্টি/কোড নতুন branch পায় (inherit করে)**।
+
+## 📋 Branch দেখা
+
+```bash
+git branch                 # লোকাল branch লিস্ট
+git branch -a              # সব branch (লোকাল + remote)
+git branch -v              # ব্রাঞ্চ + শেষ commit সহ বিস্তারিত
+git branch --show-current  # বর্তমানে কোন branch-এ আছি শুধু সেটা
+```
+
+## ➕ Branch তৈরি + সাথে সাথে সুইচ
+
+```bash
+git checkout -b branchAnyName
+# নতুন branch তৈরি হবে এবং সাথে সাথে সেই branch-এ চলে যাবে
+
+# আধুনিক সিনট্যাক্স:
+git switch -c branchAnyName
+```
+
+## 🔀 এক branch থেকে আরেক branch-এ সুইচ
+
+```bash
+git checkout branchName
+# অথবা:
+git switch branchName
+```
+
+> ⚠️ **মনে রাখো:** uncommitted কাজ রেখে সুইচ করলে Git আটকে দিতে পারে। তাই সুইচ করার আগে হয় `git add .` + `git commit` করো, নাহলে `git stash` করো (পার্ট ১০ দেখো)।
+
+## 🗑️ Branch ডিলিট
+
+```bash
+git branch -d branchName
+git branch -d feature      # উদাহরণ
+
+# যদি merge না হওয়া branch জোর করে ডিলিট করতে চাও:
+git branch -D branchName
+```
+
+> 💡 প্যাটার্ন: ফিচার branch-এ কাজ (যেমন Login System) শেষ → main/master-এর সাথে merge → তারপর ফিচার branch ডিলিট করে দাও।
+
+## 🌏 Remote-এর নতুন branch নিজের PC-তে আনা
+
+clone করলে main branch অটো আসে, কিন্তু অন্য branch **ম্যানুয়ালি fetch** করতে হয়:
+
+```bash
+# remote-এর branch নাম জানতে/আনতে:
+git fetch origin momen
+
+# remote branch থেকে লোকাল branch বানিয়ে সাথে সাথে সুইচ:
+git checkout -b momen origin/momen
+```
+
+---
+---
+
+# 🔀 পার্ট ৪: Merge এবং Merge Conflict সমাধান
+
+## 🎯 Merge কী করে
+
+এক branch-এর সব পরিবর্তন আরেক branch-এ এনে দেয়। যেমন: feature branch-এ Login System শেষ → master-এ merge → master এখন Login পেয়ে গেল।
+
+## ⚡ ধরন ১: Fast-Forward Merge
+
+**পরিস্থিতি:** master-এ কাজ করার পর feature branch বানালে → feature-এ কাজ শেষ করে commit করলে → master-এ ফিরে এলে **master-এ কোনো নতুন commit হয়নি** → এখন merge করলে সমস্যা ছাড়াই সফল হবে।
+
+```bash
+git branch                  # branch চেক
+git checkout master         # master-এ সুইচ
+git merge feature           # feature (child) branch-কে master-এ merge
+```
+
+merge-এর পর child branch মুছে ফেললে main/master-এ কোনো সমস্যা হয় না — এটাই **Fast-Forward Merging**।
+
+## 🔗 ধরন ২: Merge with Commit (তিন-মুখী পরিস্থিতি)
+
+**পরিস্থিতি:**
+
+```
+master branch commit  => 1, 2, 3
+feature branch commit => 1, 2          (3 থেকে বানানো)
+আবার master-এ ফিরে নতুন commit => 4, 5
+```
+
+এখন feature-এর commit আর master-এর নতুন commit আলাদা হয়ে গেছে (diverge করেছে)। এই অবস্থায় merge করতে গেলে Git একটা **merge commit** বানায় — দুই branch-এর সব commit একসাথে যুক্ত হয়ে শেষ commit হিসেবে থাকে। দুই ব্রাঞ্চে **একই ফাইলের একই লাইন** বদলানো থাকলেই তবে conflict হয়।
+
+## 📌 বাস্তব উদাহরণ: `momen` branch-এর সব আপডেট `momen-dev`-এ আনা
+
+**প্রশ্ন:** 2টা branch — 1. `momen` 2. `momen-dev`। সব আপডেট কোড `momen`-এ আছে, এখন `momen-dev`-কে আপডেট করতে চাই। কী করব?
+
+```bash
+# ধাপ ১: momen-dev branch-এ যাও
+git checkout momen-dev
+# অথবা: git switch momen-dev
+
+# ধাপ ২: momen branch-কে momen-dev-এ merge করো
+git merge momen
+# (remote-এর সর্বশেষ নিতে চাইলে: git merge origin/momen)
+
+# ধাপ ৩: merge শেষে push করো — সব commit momen-dev-এ আপডেট হবে
+git push origin momen-dev
+```
+
+> 📌 **merge-এর গোল্ডেন রুল:** merge-এর আগে অবশ্যই `git pull` দিয়ে **লেটেস্ট কোড নাও**, নাহলে conflict/fast-forward error আসতে পারে।
+
+## 🥊 Merge Conflict — কেন হয় ও কীভাবে সমাধান করা হয়
+
+**কখন হয়:** দুই branch-এ **একই ফাইলের একই জায়গায়** দুইজন আলাদা পরিবর্তন করেছে — Git বুঝতে পারে না কোনটা রাখবে।
+
+**দেখতে যেমন হয়:**
+
+```
+<<<<<<< HEAD
+এই লাইনটা তোমার বর্তমান branch-এর (current) কোড
+=======
+এই লাইনটা আসা (incoming) branch-এর কোড
+>>>>>>> feature
+```
+
+### সমাধানের ৩টি উপায় (VS Code ব্যবহার করলে):
+
+VS Code conflict-এর জায়গায় ক্লিক করলেই অপশন দেখায়:
+
+| অপশন | মানে |
+| ---- | ---- |
+| **Accept Current Change** | নিজের branch-এর কোড রাখবে |
+| **Accept Incoming Change** | আসা branch-এর কোড রাখবে |
+| **Accept Both Changes** | দুটোই রাখবে |
+
+(এছাড়া **Compare Changes** দিয়ে পাশাপাশি দেখে ম্যানুয়ালি এডিটও করা যায়।)
+
+### ম্যানুয়ালি সমাধান (টার্মিনালে):
+
+```bash
+# ধাপ ১: কোন ফাইলে conflict হয়েছে দেখো
+git status
+
+# ধাপ ২: ফাইল খুলে <<<<<<< ======= >>>>>>> মার্কারগুলো বাদ দিয়ে
+#         কোন কোড থাকবে ঠিক করে এডিট করো (বা VS Code-এর অপশন নাও)
+
+# ধাপ ৩: ঠিক করা ফাইল stage করো
+git add .
+
+# ধাপ ৪: conflict resolve করে commit সম্পন্ন করো
+git commit -m "resolve merge conflict"
+```
+
+### 🚫 merge/switch করতে না পারলে (আটকে গেলে) স্ট্র্যাটেজি:
+
+```bash
+git add .
+git commit -m "commit"
+# এবার branch সুইচ করে merge করো
+```
+
+### 🔥 কমন Merge Error ও ফিক্স
+
+**Error ১: `refusing to merge unrelated histories`** (দুই রিপোর আলাদা history):
+
+```bash
+git merge origin/alim-dev --allow-unrelated-histories
+git add .
+git commit -m "merge done"
+git push origin ashraful
+```
+
+**Error ২: push করতে না পারলে:**
+
+```bash
+git pull origin main --allow-unrelated-histories
+```
+
+## 🧪 PR (Pull Request) merge হওয়ার পর লোকালি আনা
+
+```bash
+# যে branch-এ merge হয়েছে সেখানে যাও
+git checkout main
+
+# PR-এর merge করা পরিবর্তন pull করো
+git pull origin pull/<PR_number>/merge
+
+# আবার push করে দাও
+git push origin main
+```
+
+## 🔁 এক branch-এর পুরো কোড অন্য branch-এর কোড দিয়ে replace করা
+
+**উদাহরণ:** `momen` branch-এর সব কোড মুছে `hello` branch-এর কোড বসাতে চাও:
+
+```bash
+git switch momen                  # আগে momen-এ যাও
+git reset --hard hello            # momen-এর সব কোড মুছে hello-র সব কোড বসে যাবে
+git push --set-upstream origin momen   # আপডেট push করো
+```
+
+---
+---
+
+# 🍴 পার্ট ৫: Forking ও Pull Request (Open Source Contribution)
+
+## 🧠 Fork কী?
+
+**অন্যের GitHub প্রোফাইলের রিপোজিটরি নিজের GitHub অ্যাকাউন্টে কপি করা।** তারপর নিজের কপিতে কাজ করে, শেষে মূল রিপোতে Pull Request পাঠিয়ে কন্ট্রিবিউট করা হয়।
+
+## 📊 পুরো ফ্লো (ডায়াগ্রাম):
+
+```
+┌───────────────────────┐         fork          ┌───────────────────────┐
+│ Image-slider repo     │ ────────────────────► │ Image-slider repo     │
+│ Roni(A) GitHub Profile│                       │shuvo(B) GitHub Profile│
+└───────────────────────┘                       └───────────────────────┘
+        ▲                                               │
+        │                                               │ clone
+        │                                     ┌─────────────────────────────┐
+        │                                     │ Image-slider repo           │
+        │                                     │ shuvo (B) local git repo    │
+        │                                     └─────────────────────────────┘
+        │                                               │
+        │                                  make changes │
+        │                                               ▼
+        │                                     ┌──────────────────────┐
+        │                                     │ Changes & Commit     │
+        │                                     │ Local Git Repo       │
+        │                                     └──────────────────────┘
+        │                                               │
+        │                                     push changes │
+        │                                               │
+        │                                               ▼
+        ◄────────────────────── pull request ────────────┘
+```
+
+## 🛠️ Forking — ধাপে ধাপে (Part 1)
+
+1️⃣ যেকোনো GitHub প্রোফাইলে যাও (যেমন: প্রোফাইল **'A'**)
+2️⃣ যে রিপোজিটরিতে কন্ট্রিবিউট করতে চাও সেটা সিলেক্ট করো
+3️⃣ রিপোর **Fork** বাটনে ক্লিক করো
+➡ এতে রিপোটা কপি হয়ে তোমার অ্যাকাউন্টে (প্রোফাইল **'B'**) চলে আসবে
+
+4️⃣ তোমার fork করা রিপো **নিজের PC-তে clone** করো:
+
+```bash
+git clone https://github.com/B/contribute_repo.git
+```
+
+5️⃣ লোকালি পরিবর্তন করো
+6️⃣ Commit করো:
+
+```bash
+git add .
+git commit -m "Your commit message"
+```
+
+7️⃣ নিজের GitHub রিপোতে push করো:
+
+```bash
+git push origin branch_name
+```
+
+## 📮 Forking — Pull Request পাঠানো (Part 2)
+
+1️⃣ তোমার প্রোফাইল **'B'**-তে যাও
+2️⃣ Fork করা রিপোটা খোলো
+3️⃣ **Pull Request** এ ক্লিক করো (মূল রিপোতে তোমার পরিবর্তন merge করার রিকোয়েস্ট)
+
+**এই ৪টা অপশন পাবে:**
+
+| অপশন | কী সিলেক্ট করবে |
+| ---- | --------------- |
+| Option 1 | **মূল রিপো** (প্রোফাইল 'A') — যেখানে কন্ট্রিবিউট করতে চাও |
+| Option 2 | 'A'-র **branch** (সাধারণত `main`/`master`) |
+| Option 3 | **তোমার fork** (প্রোফাইল 'B') — যেখানে পরিবর্তন করেছো |
+| Option 4 | 'B'-র **branch** — যেখানে commit করেছো |
+
+✅ Submit করলে প্রোফাইল 'A' তোমার Pull Request **review** করবে
+✅ Accepted (merged) হলে তোমার কন্ট্রিবিউশন মূল প্রজেক্টে যুক্ত হবে, আর তোমার প্রোফাইল ('B') **Contributors list**-এ দেখা যাবে!
+
+## 💻 টার্মিনাল থেকেই PR বানানো (GitHub CLI)
+
+```bash
+# head branch (dev1) থেকে base branch (main)-এ PR:
+gh pr create --base main --head dev1 --title "Title of your PR" --body "Description of your PR"
+```
+
+## 📖 Pull Request বনাম Pull — পার্থক্য
+
+- **`git pull`** = online-এর commit নিজের offline git-এ নামা
+- **Pull Request (PR)** = GitHub-এ এক branch-এর কোড আরেক branch-এ merge করার রিকোয়েস্ট; এতে একাধিক commit একসাথে squash/merge হয়। PR merge হলে লোকালে আনতে `git pull` চালাও
+
+---
+---
+
+# 👥 পার্ট ৬: Team Collaboration + Branch Protection Rule
+
+## 🎯 উদ্দেশ্য
+
+এই ওয়ার্কফ্লো নিশ্চিত করে যে **কেউ সরাসরি main/master branch-এ push করতে পারবে না**। সব পরিবর্তন অবশ্যই **review process (Pull Request)** দিয়ে যাবে, তারপর merge হবে।
+
+## ⚙️ রিপো ওনার (প্রোফাইল 'A') — Branch Protection চালু করা
+
+```
+Settings → Branches → Branch Protection Rules:
+- Require pull request reviews before merging   (merge-এর আগে review লাগবে)
+- Require status checks to pass before merging  (অপশনাল — CI টেস্ট পাস লাগবে)
+- Disallow force pushes to the branch           (force push নিষিদ্ধ)
+```
+
+## 👨‍💻 ডেভেলপার (প্রোফাইল 'B') — ওয়ার্কফ্লো
+
+```
+1️⃣ রিপো clone করো:
+   git clone https://github.com/A/project.git
+
+2️⃣ ফিচার/ফিক্সের জন্য নতুন branch বানাও:
+   git checkout -b feature_branch
+
+3️⃣ কাজ করো:
+   git add .
+   git commit -m "Add new feature"
+
+4️⃣ Branch-টা remote-এ push করো:
+   git push origin feature_branch
+```
+
+## 📮 Pull Request ও Review
+
+```
+1️⃣ GitHub → Repository → Pull Requests → New Pull Request
+
+2️⃣ সিলেক্ট করো:
+   - Base Branch:    main (protected branch)
+   - Compare Branch: feature_branch (তোমার নতুন branch)
+
+3️⃣ Pull Request submit করো
+
+4️⃣ রিপো ওনার ('A') PR review করবে
+   ✅ Approved হলে ওনার main-এ merge করবে
+   ✅ তোমার পরিবর্তন এখন main branch-এ
+```
+
+## 🔑 মূল নিয়ম
+
+🚫 **main-এ সরাসরি Push ব্লকড!**
+✅ সব পরিবর্তন যাবে **Pull Request & Review** দিয়ে।
+
+## 📊 ASCII ফ্লো ডায়াগ্রাম:
+
+```
+┌───────────────────────┐
+│   GitHub Repo (A)     │
+│   main (protected)    │◄───┐  Merge after review
+└───────────────────────┘    │
+                             │
+                             │ Pull Request (Code Review)
+                             │
+┌───────────────────────┐    │
+│  Developer Git Clone  │────┘
+│  (Local Repo, B)      │
+└───────────────────────┘
+         │
+         │ Create New Branch
+         ▼
+┌───────────────────────┐
+│ Feature Branch        │
+│ Local Commits         │
+└───────────────────────┘
+         │
+         │ Push to Remote Branch
+         ▼
+┌───────────────────────┐
+│ GitHub Repo (A)       │
+│ New Branch (B's code) │
+└───────────────────────┘
+```
+
+---
+---
+
+# 🛠️ পার্ট ৭: Git + SSH সম্পূর্ণ কনফিগারেশন (নিজের PC — স্থায়ী সেটআপ)
+
+এই গাইড দিয়ে তুমি পারবে:
+
+- SSH কী (key) তৈরি করা
+- সেটা GitHub / GitLab / Bitbucket-এ যোগ করা
+- Git গ্লোবালি কনফিগার করা
+- SSH দিয়ে রিপো clone করা
+- HTTPS থেকে SSH remote URL-এ সুইচ করা
+
+---
+
+## 🔐 ধাপ ১: আগের SSH কী আছে কিনা চেক করো
+
+```bash
+ls -al ~/.ssh
+```
+
+এই ফাইলগুলো খুঁজে দেখো:
+
+- `id_rsa`, `id_rsa.pub`
+- `id_ed25519`, `id_ed25519.pub` ← **রিকমেন্ডেড (আধুনিক)**
+- `id_ecdsa`, `id_ecdsa.pub`
+
+যদি কিছুই না থাকে, তাহলে নতুন কী তৈরি করতে হবে।
+
+---
+
+## 🧑‍💻 ধাপ ২: নতুন SSH কী তৈরি করা
+
+**আধুনিক সিস্টেমের জন্য (রিকমেন্ডেড):**
+
+```bash
+ssh-keygen -t ed25519 -C "your_email@example.com"
+```
+
+**পুরনো সিস্টেমের জন্য:**
+
+```bash
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+```
+
+প্রম্পট আসলে:
+
+- `Enter` চাপো — ডিফল্ট লোকেশন (`~/.ssh/id_ed25519`) একসেপ্ট করতে
+- চাইলে একটা **passphrase** সেট করো (নিরাপত্তার জন্য ভালো)
+
+---
+
+## 🧪 ধাপ ৩: SSH Agent চালু করে কী যোগ করা
+
+**এজেন্ট চালু করো:**
+
+```bash
+eval "$(ssh-agent bash)"
+```
+
+**প্রাইভেট কী যোগ করো:**
+
+```bash
+ssh-add ~/.ssh/id_ed25519
+```
+
+> RSA কী বানিয়ে থাকলে `id_rsa` ব্যবহার করো।
+
+**ভেরিফাই করো:**
+
+```bash
+ssh-add -l
+```
+
+এরকম আউটপুট দেখতে পাওয়ার কথা:
+
+```
+256 SHA256:abc123xyz... ~/.ssh/id_ed25519 (ED25519)
+```
+
+---
+
+## 📋 ধাপ ৪: পাবলিক SSH কী কপি করা
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+পুরো লাইনটা কপি করো, যেটা দেখতে এরকম:
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMx6JHZtHAAg9g7BCZ7b5vRA1VYgc1fXV6AYlPOScIfa your_email@example.com
+```
+
+---
+
+## 🌐 ধাপ ৫: SSH কী Git হোস্টিং সার্ভিসে যোগ করা
+
+### 🔗 GitHub:
+
+- https://github.com/settings/keys
+- **New SSH key** তে ক্লিক করো
+- কী পেস্ট করে সেভ করো
+
+### 🔗 GitLab:
+
+- https://gitlab.com/-/profile/keys
+
+### 🔗 Bitbucket:
+
+- https://bitbucket.org/account/settings/ssh-keys/
+
+---
+
+## 🛰 ধাপ ৬: SSH কানেকশন টেস্ট করা
+
+**GitHub-এর জন্য:**
+
+```bash
+ssh -T git@github.com
+```
+
+**এক্সপেক্টেড আউটপুট:**
+
+```
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+**GitLab-এর জন্য:**
+
+```bash
+ssh -T git@gitlab.com
+```
+
+---
+
+## 📦 ধাপ ৭: গ্লোবাল Git কনফিগ (নাম ও ইমেইল)
+
+কমিটে যে নাম-ইমেইল দেখাবে সেটা সেট করো:
+
+```bash
+git config --global user.name "Your Full Name"
+git config --global user.email "your_email@example.com"
+```
+
+**ভেরিফাই করো:**
+
+```bash
+git config --list
+```
+
+---
+
+## 🧩 ধাপ ৮: SSH দিয়ে রিপো Clone করা
+
+```bash
+git clone git@github.com:Ashraful-Momen/TestGit.git
+```
+
+তারপর ডিরেক্টরিতে ঢুকো:
+
+```bash
+cd TestGit
+```
+
+এবার রিপোর ভেতরে কাজ করতে পারো।
+
+---
+
+## 🔄 ধাপ ৯: Remote URL কে HTTPS থেকে SSH-তে বদলানো (যদি দরকার হয়)
+
+**বর্তমান remote দেখো:**
+
+```bash
+git remote -v
+```
+
+**SSH-তে বদলাও:**
+
+```bash
+git remote set-url origin git@github.com:Ashraful-Momen/TestGit.git
+```
+
+**আবার ভেরিফাই করো:**
+
+```bash
+git remote -v
+```
+
+---
+
+## 🎯 ধাপ ১০: (অপশনাল) লগইনের সময় SSH Agent অটো-স্টার্ট
+
+`.bashrc` এডিট করো:
+
+```bash
+nano ~/.bashrc
+```
+
+একদম নিচে এটা যোগ করো:
+
+```bash
+# Auto-start SSH agent
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  eval "$(ssh-agent bash)"
+  ssh-add ~/.ssh/id_ed25519 &>/dev/null
+fi
+```
+
+সেভ করে বের হও (`Ctrl+O`, `Enter`, `Ctrl+X`), তারপর রিলোড করো:
+
+```bash
+source ~/.bashrc
+```
+
+---
+
+## 🧼 ধাপ ১১: ক্লিনআপ (অপশনাল)
+
+একাধিক কী বানিয়ে ফেলেছো বা নতুন করে শুরু করতে চাইলে:
+
+```bash
+rm -v ~/.ssh/id_ed25519*
+ssh-keygen -t ed25519 -C "your_email@example.com"
+```
+
+---
+
+## ✅ পার্ট ৭ সামারি চেকলিস্ট
+
+| ধাপ | কাজ |
+| ------ | ------ |
+| ✅ | SSH কী তৈরি করা |
+| ✅ | কী SSH agent-এ যোগ করা |
+| ✅ | পাবলিক কী কপি করা |
+| ✅ | GitHub / GitLab / Bitbucket-এ কী পেস্ট করা |
+| ✅ | SSH কানেকশন টেস্ট করা |
+| ✅ | গ্লোবাল Git নাম/ইমেইল সেট করা |
+| ✅ | SSH দিয়ে রিপো clone করা |
+| ✅ | দরকার হলে remote-কে SSH-তে বদলানো |
+| ✅ | SSH agent অটো-স্টার্ট (অপশনাল) |
+
+---
+---
+
+# 🔁 পার্ট ৮: অন্য PC-তে সাময়িকভাবে Git ব্যবহার + পরে ক্রেডেনশিয়াল রিমুভ
+
+**পরিস্থিতি:** তোমার নিজের PC নেই, অন্য কারো PC বা ল্যাবের PC ব্যবহার করছো। কাজ শেষে সেই PC থেকে তোমার GitHub ক্রেডেনশিয়াল সম্পূর্ণ মুছে ফেলতে হবে।
+
+**৩টি পদ্ধতি আছে:**
+
+| পদ্ধতি | নিরাপত্তা | সুবিধা |
+| ----------------- | ------------------ | ------------------ |
+| 1️⃣ Personal Access Token (PAT) | মাঝারি | সবচেয়ে সহজ, দ্রুত |
+| 2️⃣ SSH কী | সবচেয়ে নিরাপদ | বেশি নিরাপদ, passphrase সুবিধা |
+| 3️⃣ GitHub CLI (`gh`) | ভালো | সবচেয়ে পরিষ্কার ক্লিনআপ |
+
+---
+
+## 🪙 পদ্ধতি ১: Personal Access Token — PAT (সাময়িক ব্যবহারের জন্য রিকমেন্ডেড)
+
+### 🔧 সেটআপ (তোমার নিজের PC/ফোন থেকে):
+
+1. GitHub-এ যাও → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+2. **Generate new token** এ ক্লিক করো
+3. নাম দাও, **expiration সেট করো** (যেমন: সাময়িক ব্যবহারের জন্য ৭ দিন), আর scopes সিলেক্ট করো:
+   - `repo` (প্রাইভেট রিপোজিটরির ফুল কন্ট্রোল)
+   - `workflow` (CI/CD-এর জন্য)
+4. **Generate token** ক্লিক করে টোকেনটা **কপি করো** (⚠️ মাত্র একবারই দেখাবে!)
+
+### 💻 অন্য PC-তে ব্যবহার:
+
+```bash
+git clone https://github.com/yourusername/repo.git
+# পাসওয়ার্ড চাইলে পাসওয়ার্ডের জায়গায় টোকেনটা ব্যবহার করো
+```
+
+### 🧹 ব্যবহার শেষে রিমুভ:
+
+```bash
+# সেভ করা ক্রেডেনশিয়াল মুছে ফেলো
+git credential-cache exit  # Mac/Linux-এ
+# অথবা Windows-এ Credential Manager থেকে ম্যানুয়ালি ডিলিট করো
+```
+
+---
+
+## 🔑 পদ্ধতি ২: SSH কী (আরও নিরাপদ)
+
+### ধাপ ১: অন্য PC-তে কাস্টম SSH কী তৈরি করো
+
+```bash
+# কাস্টম নাম ও passphrase সহ SSH কী তৈরি
+ssh-keygen -t ed25519 -C "temp-cicd@pc" -f ~/.ssh/id_ed25519_temp -N "your-passphrase"
+```
+
+**ফ্ল্যাগগুলোর ব্যাখ্যা:**
+
+- `-t ed25519` = কী-এর টাইপ (আধুনিক ও নিরাপদ)
+- `-C "temp-cicd@pc"` = কী-এর লেবেল/কমেন্ট
+- `-f ~/.ssh/id_ed25519_temp` = কাস্টম ফাইলনেম (যেকোনো নাম দিতে পারো)
+- `-N "your-passphrase"` = কী-এর passphrase (অপশনাল কিন্তু রিকমেন্ডেড)
+
+**অল্টারনেটিভ: ইন্টারঅ্যাক্টিভ উপায় (ফ্ল্যাগে অস্বস্তি লাগলে):**
+
+```bash
+ssh-keygen -t ed25519 -C "temp-cicd@pc"
+# তারপর প্রম্পট অনুযায়ী:
+# Enter file: /Users/username/.ssh/id_ed25519_temp
+# Enter passphrase: (তোমার পাসওয়ার্ড)
+# Confirm passphrase: (আবার একই পাসওয়ার্ড)
+```
+
+### ধাপ ২: পাবলিক কী দেখো
+
+```bash
+cat ~/.ssh/id_ed25519_temp.pub
+# পুরো আউটপুট কপি করো
+```
+
+### ধাপ ৩: পাবলিক কী GitHub-এ যোগ করো
+
+1. GitHub → **Settings** → **SSH and GPG keys** → **New SSH key**
+2. পাবলিক কী পেস্ট করো (যেটা `.pub` এ শেষ হয়)
+3. টাইটেল দাও, যেমন: "Temp CI/CD PC"
+4. **Add SSH key** এ ক্লিক করো
+
+### ধাপ ৪: SSH কনফিগ করে কাস্টম কী ব্যবহারের নির্দেশ দাও
+
+`~/.ssh/config` ফাইল তৈরি/এডিট করো:
+
+```
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_temp
+```
+
+### ধাপ ৫: কানেকশন টেস্ট করো
+
+```bash
+ssh -T git@github.com
+# আউটপুট আসবে: "Hi yourusername! You've successfully authenticated..."
+```
+
+### 💻 অন্য PC-তে ব্যবহার:
+
+```bash
+git clone git@github.com:yourusername/repo.git
+```
+
+### 🧹 ব্যবহার শেষে রিমুভ:
+
+```bash
+# SSH কী-এর ফাইল দুটো ডিলিট করো
+rm ~/.ssh/id_ed25519_temp
+rm ~/.ssh/id_ed25519_temp.pub
+
+# SSH কনফিগ এন্ট্রি রিমুভ করো (~/.ssh/config এডিট করে)
+
+# GitHub থেকে রিমুভ: Settings → SSH and GPG keys → কীটা ডিলিট করো
+```
+
+---
+
+## 🖥️ পদ্ধতি ৩: GitHub CLI (সবচেয়ে পরিষ্কার)
+
+### সেটআপ:
+
+```bash
+# GitHub CLI ইনস্টল করো
+# Windows: choco install gh
+# Mac: brew install gh
+
+# অথেন্টিকেট করো
+gh auth login
+# HTTPS সিলেক্ট করো, টোকেন চাইলে পেস্ট করো
+```
+
+### ব্যবহার শেষে রিমুভ:
+
+```bash
+gh auth logout
+# সব ক্রেডেনশিয়াল সাথে সাথে মুছে যাবে
+```
+
+---
+
+## 🛡️ বেস্ট সিকিউরিটি প্র্যাকটিস
+
+- সাময়িক টোকেনের জন্য **ছোট expiration টাইম** ব্যবহার করো
+- বেশি নিরাপত্তার জন্য টোকেনের বদলে **SSH কী** ব্যবহার করো
+- অতিরিক্ত সুরক্ষার জন্য SSH কী-তে **passphrase** দাও
+- CI/CD কাজ শেষ হলে **ক্রেডেনশিয়াল সাথে সাথে ডিলিট** করো
+- ক্রেডেনশিয়াল বা টোকেন কখনো git-এ কমিট করো না
+- সেনসিটিভ ফাইল বাদ দিতে `.gitignore` ব্যবহার করো
+
+### 📝 SSH কী ম্যানেজমেন্ট কুইক চিটশিট:
+
+```bash
+# সব SSH কী-এর লিস্ট দেখো
+ls -la ~/.ssh/
+
+# SSH কী কাজ করছে কিনা চেক করো
+ssh -T -i ~/.ssh/id_ed25519_temp git@github.com
+
+# একটা কী রিমুভ করো
+rm ~/.ssh/id_ed25519_temp*
+
+# ডিলিট করার আগে টেস্ট করে নাও
+ssh -T -i ~/.ssh/id_ed25519_temp git@github.com
+```
+
+---
+---
+
+# 🚀 পার্ট ৯: CI/CD-র জন্য টোকেন দিয়ে অন্য PC-তে সাময়িক Git ব্যবহার (ধাপে ধাপে)
+
+এটা হলো PAT পদ্ধতির **বিস্তারিত সম্পূর্ণ ওয়ার্কফ্লো** — টোকেন বানানো থেকে শুরু করে সব ক্লিন করা পর্যন্ত।
+
+---
+
+## 🪙 ধাপ ১: নিজের মেইন PC-তে Personal Access Token তৈরি করো
+
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+2. **Generate new token** এ ক্লিক করো
+3. টোকেনের ডিটেইলস কনফিগার করো:
+   - **Token name**: বর্ণনামূলক নাম দাও, যেমন "Temp CI/CD Token - PC2"
+   - **Expiration**: নিরাপত্তার জন্য ছোট সময় দাও (যেমন: ৭ দিন)
+   - **Scopes**: দরকারি পারমিশন সিলেক্ট করো:
+     - `repo` (প্রাইভেট রিপোজিটরির ফুল কন্ট্রোল)
+     - `workflow` (CI/CD পাইপলাইনের জন্য)
+4. **Generate token** ক্লিক করো আর **সাথে সাথে কপি করো** (⚠️ মাত্র একবারই দেখাবে!)
+5. টোকেনটা সাময়িকভাবে নিরাপদ জায়গায় রাখো (কখনো git-এ কমিট করবে না)
+
+---
+
+## 💻 ধাপ ২: অন্য PC-তে টোকেন সেটআপ করো
+
+অন্য PC-তে টার্মিনাল/কমান্ড প্রম্পট খুলে Git কনফিগার করো:
+
+```bash
+# Git সেটআপ
+git config --global user.name "Your Name"
+git config --global user.email "your-email@gmail.com"
+
+# টোকেন নিরাপদে সেভ করো (নিচের যেকোনো একটা পদ্ধতি)
+```
+
+### 🅰 অপশন A: Git Credential Manager-এ সেভ করা (রিকমেন্ডেড)
+
+```bash
+# Windows
+git config --global credential.helper manager-core
+
+# Mac
+git config --global credential.helper osxkeychain
+
+# Linux
+git config --global credential.helper store
+```
+
+### 🅱 অপশন B: `.git-credentials` ফাইলে সেভ করা (সিম্পল)
+
+```bash
+# ক্রেডেনশিয়াল ফাইল তৈরি করো
+echo "https://yourusername:YOUR_TOKEN@github.com" >> ~/.git-credentials
+
+# পারমিশন সেট করো
+chmod 600 ~/.git-credentials
+```
+
+---
+
+## 🧪 ধাপ ৩: টোকেন টেস্ট করে কাজ শুরু করো
+
+```bash
+# রিপো clone করো
+git clone https://github.com/yourusername/repo.git
+cd repo
+
+# টোকেন অটোমেটিক ব্যবহৃত হবে
+# CI/CD কাজ শুরু করো
+```
+
+**টোকেন কাজ করছে কিনা ভেরিফাই করো:**
+
+```bash
+git push origin main
+# সফল হলে বুঝবে টোকেন ঠিকমতো কনফিগার হয়েছে
+```
+
+---
+
+## 🧹 ধাপ ৪: কাজ শেষ — ক্লিনআপ
+
+### Git Credential Manager থেকে টোকেন রিমুভ:
+
+```bash
+# Windows
+git credential-manager erase https://github.com
+
+# Mac
+git credential-osxkeychain erase https://github.com
+
+# Linux
+git credential-cache exit
+```
+
+### ক্রেডেনশিয়াল ফাইল ডিলিট (অপশন B ব্যবহার করলে):
+
+```bash
+rm ~/.git-credentials
+```
+
+### Git কনফিগ ক্লিয়ার (অপশনাল):
+
+```bash
+# সেভ করা ক্রেডেনশিয়াল রিমুভ
+git config --global --unset credential.helper
+
+# অথবা পুরো Git কনফিগ দেখে নাও
+git config --global --list
+```
+
+---
+
+## 🔥 ধাপ ৫: GitHub-এ টোকেন রিভোক করো (ফাইনাল ধাপ)
+
+1. নিজের মেইন PC-তে GitHub-এ ফিরে যাও
+2. **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**-এ যাও
+3. তোমার টোকেনটা খুঁজো (যেমন: "Temp CI/CD Token - PC2")
+4. **Delete** এ ক্লিক করো — সাথে সাথে রিভোক হবে
+5. এখন টোকেনটা সম্পূর্ণ অব্যবহারযোগ্য হয়ে যাবে ✅
+
+---
+
+## 🚪 অন্য PC থেকে GitHub লগআউট:
+
+```bash
+# সব GitHub ক্রেডেনশিয়াল ক্লিয়ার করো
+git config --global --unset user.name
+git config --global --unset user.email
+
+# অপশনাল: Git ক্যাশ সম্পূর্ণ ক্লিয়ার
+git credential-cache flush
+```
+
+---
+
+## ✅ নিরাপত্তা চেকলিস্ট — সব শেষ হলে:
+
+- ✅ GitHub থেকে টোকেন ডিলিট হয়েছে
+- ✅ Credential manager থেকে ক্রেডেনশিয়াল রিমুভ হয়েছে
+- ✅ `~/.git-credentials` ফাইল ডিলিট হয়েছে (থাকলে)
+- ✅ Git কনফিগ ক্লিয়ার হয়েছে
+- ✅ অন্য PC থেকে clone করা রিপোগুলো ডিলিট হয়েছে
+- ✅ ব্রাউজার হিস্ট্রি ক্লিয়ার হয়েছে (অনলাইনে লগইন করে থাকলে)
+
+---
+
+## ⚡ কুইক রেফারেন্স — সম্পূর্ণ ওয়ার্কফ্লো:
+
+```bash
+# ===== অন্য PC-তে — সেটআপ =====
+git config --global credential.helper manager-core
+git clone https://github.com/yourusername/repo.git
+cd repo
+
+# ===== কাজ করো =====
+git add .
+git commit -m "Your changes"
+git push origin main
+
+# ===== অন্য PC-তে — ক্লিনআপ =====
+git credential-manager erase https://github.com
+git config --global --unset user.name
+git config --global --unset user.email
+rm -rf ~/repo  # Clone করা রিপোজিটরি ডিলিট করো
+
+# ===== মেইন PC-তে — ফাইনাল ক্লিনআপ =====
+# GitHub Settings → Developer settings → টোকেনটা ডিলিট করো
+```
+
+---
+---
+
+# 🧰 পার্ট ১০: জরুরি টুলস ও কমন Error ফিক্স
+
+## 📦 git stash — কাজ সাময়িক সেভ (commit না করে)
+
+**পরিস্থিতি:** তুমি `momen` branch-এ কাজ করছো, হঠাৎ বলা হলো অন্য branch-এর সাথে merge করতে হবে। এখন হাফ-ডান কাজ commit করতে চাও না!
+
+```bash
+# বর্তমান কাজ git-এর মেমোরিতে (copy) রেখে দাও:
+git stash
+
+# এবার নিরাপদে অন্য branch-এ গিয়ে merge করো
+# ...merge শেষ...
+
+# merge শেষে আবার নিজের branch-এ এসে কাজটা (paste) ফেরত নাও:
+git stash pop
+```
+
+- `git stash` = বর্তমান অসম্পূর্ণ কাজ গিট-মেমোরিতে **copy**
+- `git stash pop` = সেই কাজ branch-এ ফিরিয়ে **paste**
+
+## ⏪ git reset — commit/কোড ফিরিয়ে নেওয়া
+
+```bash
+# ১ ধাপ পেছনের commit-এ ফিরে যাও (পরের commit + কোড মুছে যাবে):
+git reset --hard HEAD~1
+
+# এক branch-এর সব কোড মুছে অন্য branch-এর কোড বসাও (যেমন momen ← hello):
+git switch momen
+git reset --hard hello
+git push --set-upstream origin momen
+```
+
+> ⚠️ `--hard` কোডও মুছে দেয় — সাবধানে ব্যবহার করো।
+
+## 🧹 git clean — untracked ফাইল মুছে ফেলা
+
+```bash
+# commit করা হয়নি এমন নতুন ফাইল/ফোল্ডার (untracked) মুছে ফেলে আগের stage-এ ফেরায়:
+git clean -fd
+```
+
+## 🌊 কমন Error ও ফিক্স (একনজরে)
+
+| Error / সমস্যা | সমাধান |
+| -------------------------- | ---------------------------------------- |
+| `refusing to merge unrelated histories` | `git merge origin/branch --allow-unrelated-histories` তারপর add+commit+push |
+| push করতে সমস্যা | `git pull origin main --allow-unrelated-histories` |
+| branch switch/merge করতে দিচ্ছে না | আগে `git add .` → `git commit -m "..."` → তারপর switch/merge |
+| `.gitignore` লিখছো কিন্তু তবু push হচ্ছে | `git rm -r --cached . && git add . && git commit -m "..."` |
+| merge conflict | `git status` → ফাইল ঠিক করো (Accept Current/Incoming/Both) → `git add .` → `git commit` |
+
+---
+---
+
+# 🎓 পার্ট ১১: Master Cheat Sheet (সব কমান্ড এক জায়গায়)
+
+## 🔄 Daily Workflow
+
+```bash
+git status                        # অবস্থা দেখো
+git add .                         # সব stage করো
+git commit -m "message"           # commit করো
+git pull                          # online আপডেট নাও
+git push origin branch_name       # push করো
+```
+
+## 📚 সব Git কমান্ড — ক্যাটাগরি অনুযায়ী
+
+### Setup ও Config
+
+```bash
+git init
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+git config --list
+```
+
+### বেসিক
+
+```bash
+git status
+git add fileName          # git add .
+git rm --cached file      # untrack
+git commit -m "msg"
+git log                   # git log --oneline
+git log --pretty=format:"%h - %an, %ar : %s"
+```
+
+### Branch
+
+```bash
+git branch                          # লিস্ট
+git branch -a                       # লোকাল + remote
+git branch -v                       # বিস্তারিত
+git branch --show-current           # বর্তমান branch
+git checkout -b newName             # তৈরি + সুইচ
+git switch -c newName               # তৈরি + সুইচ (আধুনিক)
+git checkout name                   # সুইচ
+git switch name                     # সুইচ (আধুনিক)
+git branch -d name                  # ডিলিট
+git fetch origin branch             # remote branch আনা
+git checkout -b local origin/branch # remote branch থেকে লোকাল বানানো
+```
+
+### Merge ও Conflict
+
+```bash
+git merge branchName
+git merge origin/branch --allow-unrelated-histories
+# conflict: ফাইল ঠিক করো →
+git add .
+git commit -m "resolve conflict"
+```
+
+### Remote (GitHub)
+
+```bash
+git clone URL
+git remote add origin URL
+git remote -v
+git remote set-url origin NEW_URL
+git push -u origin main
+git push origin branch
+git pull
+git pull origin main --allow-unrelated-histories
+gh pr create --base main --head dev1 --title "T" --body "D"
+```
+
+### SSH
+
+```bash
+ls -al ~/.ssh
+ssh-keygen -t ed25519 -C "email"
+eval "$(ssh-agent bash)"
+ssh-add ~/.ssh/id_ed25519
+ssh-add -l
+cat ~/.ssh/id_ed25519.pub
+ssh -T git@github.com
+git remote set-url origin git@github.com:user/repo.git
+```
+
+### টোকেন (সাময়িক/CI-CD)
+
+```bash
+# সেটআপ
+git config --global credential.helper store      # Linux
+git config --global credential.helper manager-core   # Windows
+gh auth login
+
+# ক্লিনআপ
+git credential-cache exit
+git credential-manager erase https://github.com
+git config --global --unset credential.helper
+gh auth logout
+# + GitHub-এ টোকেন Delete/Revoke
+```
+
+### Undo ও রেসকিউ টুলস
+
+```bash
+git stash              # কাজ সেভ
+git stash pop          # কাজ ফেরত
+git reset --hard HEAD~1    # ১ commit পেছনে
+git reset --hard otherBranch   # অন্য branch-এর কোডে replace
+git clean -fd          # untracked ফাইল মুছো
+git rm -r --cached . && git add . && git commit -m "Rebuild git cache with .gitignore"
+```
+
+## 🤔 কোন পরিস্থিতিতে কোন পদ্ধতি? (Auth)
+
+| পরিস্থিতি | সেরা পদ্ধতি |
+| ------------------------------ | --------------------------------------------- |
+| নিজের PC, প্রতিদিনের কাজ | **SSH কী** (পার্ট ৭) — একবার সেটআপ, স্থায়ী সমাধান |
+| অন্যের PC, দ্রুত কাজ, কম ঝামেলা | **PAT + ছোট expiration** (পার্ট ৮/৯) |
+| অন্যের PC, বেশি নিরাপত্তা দরকার | **টেম্পোরারি SSH কী + passphrase** (পার্ট ৮) |
+| অন্যের PC, `gh` CLI ইনস্টল করা আছে | **GitHub CLI** (পার্ট ৮) — `gh auth logout` দিয়ে এক কমান্ডে ক্লিন |
+| CI/CD পাইপলাইন | **PAT** — `repo` + `workflow` scope সহ (পার্ট ৯) |
+| ওপেন সোর্স কন্ট্রিবিউশন | **Fork + Pull Request** (পার্ট ৫) |
+| টিম প্রজেক্ট | **Branch + PR review + Branch Protection** (পার্ট ৬) |
+
+## 🔑 মূল কনসেপ্টগুলো (এক লাইনে)
+
+- **commit** = ১টা snapshot/checkpoint; **HEAD** = শেষ commit-এর পয়েন্টার
+- **branch** = master থেকে বানানো আলাদা কাজের শাখা; child, parent-এর সব পায়
+- **Fast-forward merge** = master-এ নতুন commit না থাকলে সহজ সরাসরি merge
+- **Merge commit** = দুই branch-এ আলাদা commit থাকলে Git-এর বানানো সংযোজন commit
+- **Merge conflict** = একই ফাইলের একই লাইনে দুই branch-এ পরিবর্তন → ম্যানুয়ালি solve
+- **Fork** = অন্যের রিপো নিজের অ্যাকাউন্টে কপি → কাজ → PR → মূল রিপোতে merge
+- **Pull Request** = এক branch-এর কোড আরেক branch-এ merge হওয়ার review-র রিকোয়েস্ট
+- **SSH কী** = পাবলিক/প্রাইভেট কী জোড়া; পাবলিক GitHub-এ, প্রাইভেট PC-তে; পাসওয়ার্ড লাগে না
+- **PAT** = GitHub-এর বানানো টেম্পোরারি পাসওয়ার্ড (নির্দিষ্ট সময় + পারমিশন সহ)
+- **stash** = uncommitted কাজ মেমোরিতে রেখে অন্য কাজ করা, পরে `pop` করে ফেরানো
+- **`git rm --cached`** = ফাইল untrack; **`--allow-unrelated-histories`** = আলাদা history merge-এর ওষুধ
+
+## ⚠️ সবচেয়ে গুরুত্বপূর্ণ নিয়ম
+
+1. টোকেন/পাসওয়ার্ড কখনো **git-এ কমিট করবে না** — `.gitignore`-এ `.env` রাখো
+2. টোকেন **মাত্র একবারই দেখা যায়** — জেনারেট করার সাথে সাথে কপি করো
+3. সাময়িক ব্যবহারে সবসময় **ছোট expiration** দাও
+4. merge/s witch-এর আগে **commit বা stash** করো
+5. merge-এর আগে **`git pull`** দিয়ে লেটেস্ট নাও
+6. কাজ শেষে **সাথে সাথে ক্লিনআপ** করো — PC + GitHub দুই জায়গা থেকেই
+7. `git reset --hard` **কোড মুছে দেয়** — ব্যবহারের আগে দুবার ভাবো
+
+---
+
+*📅 নোট তৈরি: ৬ অক্টোবর ২০২৬ | 🐧 Parrot OS / Linux এবং Windows/Mac উভয়ের জন্য প্রযোজ্য*
+
+**Happy Hacking! 🚀🔐**
