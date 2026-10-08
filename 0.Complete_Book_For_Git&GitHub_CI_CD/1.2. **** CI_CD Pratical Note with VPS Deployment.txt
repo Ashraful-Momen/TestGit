@@ -1,0 +1,461 @@
+========================================================================
+                CI/CD PRACTICE — COMPLETE NOTE
+========================================================================
+Project : test_ci_cd   (GitHub: ashrafulunisoft/test_ci_cd)
+Goal    : git push → index.html serves on VPS port 80
+Stack   : GitHub Actions + appleboy/scp-action + Apache2
+Date    : 2026-10-08
+
+
+========================================================================
+1. ARCHITECTURE / FLOW
+========================================================================
+
+   +----------------+        +----------------------+
+   |   Local Repo   |  push  |   GitHub Actions     |
+   |   (your PC)    | -----> |  (ubuntu-latest)     |
+   +----------------+        |                      |
+                             |  1. actions/checkout |
+                             |  2. appleboy/scp-    |
+                             |     action           |
+                             +----------+-----------+
+                                        |
+                                        | SSH (port 22)
+                                        | scp with private key
+                                        v
+                             +----------------------+
+                             |   VPS  (Apache2)     |
+                             |  /var/www/html/      |
+                             |    └─ index.html     |
+                             +----------+-----------+
+                                        |
+                                        | HTTP (port 80)
+                                        v
+                                +----------------+
+                                |    Browser     |
+                                | http://VPS_IP  |
+                                +----------------+
+
+
+========================================================================
+2. PROJECT STRUCTURE
+========================================================================
+
+Practise_Code/CI_CD/
+|
++-- CI_CD_Complete_Note.txt         <-- ei file
+|
++-- test_ci_cd/                      <-- git repo (push origin main)
+    |
+    +-- .git/
+    +-- .github/
+    |   +-- workflows/
+    |       +-- any-name.yml         <-- initial test workflow (echo)
+    |       +-- deploy.yml           <-- production deploy workflow
+    |
+    +-- index.html                   <-- deploy hoye jaay /var/www/html/
+    +-- README.md
+
+
+========================================================================
+3. SETUP STEPS
+========================================================================
+
+----------------------------------------------------------------
+3.0  LOCAL REPO SETUP  -- git clone + git credentials  (one-time)
+----------------------------------------------------------------
+  STEP A: GitHub e repo banao (browser)
+    1. https://github.com/new  e jaao
+    2. Repository name: test_ci_cd
+    3. Public/Private bacho, "Add a README" tick dao
+    4. "Create repository" click
+
+  STEP B: Git identity set koro (prothom bar, one-time)
+    git config --global user.name "Ashraful"
+    git config --global user.email "your_github_email@example.com"
+    #  --> ei name/email commit history te dekha jabe
+    # verify:
+    git config --global --list
+
+  STEP C: Repo clone koro (local PC te)
+    cd /path/to/Practise_Code/CI_CD
+    git clone https://github.com/ashrafulunisoft/test_ci_cd.git
+    cd test_ci_cd
+    # Ekhon local e puro repo ase, ekhane kaj koro
+
+  STEP D: Git credentials set  (push korar somoy lagbe)
+
+    IMPORTANT: GitHub 2021 theke HTTPS push er jonno account
+    PASSWORD ar neya na. LAGBE  --> Personal Access Token (PAT)
+
+    D1. PAT banao (browser):
+        1. GitHub -> Settings -> Developer settings (sesh e)
+        -> Personal access tokens -> Tokens (classic)
+        2. "Generate new token (classic)"
+        3. Note: "test_ci_cd push"     <-- j kono naam
+        4. Expiration: 30 days (practice er jonno)
+        5. Scopes: "repo" tick dao (puro repo access)
+        6. "Generate token" click
+        7. Token ta COPY koro  (ghp_xxxxxxxxxxxx...)
+           !! Eta AAR KOKHONO dekhabe NA -- ekhon-i save koro !!
+
+    D2. Credential helper ON koro (terminal):
+        git config --global credential.helper store
+        #  --> prothom push er somoy username + PAT dile
+        #      git seta mone rakhbe, ar porer bar ar chay na
+
+        # (Alternative: sudhu kichukhon mone rakhe)
+        git config --global credential.helper 'cache --timeout=3600'
+
+    D3. Prothom push e ki ki dibo:
+        git push origin main
+        Username for 'https://github.com':  ashrafulunisoft
+        Password for 'https://...':         ghp_xxxx...   <-- PAT boshabe
+                                        (account password NA!)
+
+        # "store" helper use korle ~/.git-credentials file e
+        # plaintext save hoy -- practice PC e OK, shared PC e na
+
+  STEP E (optional, password mone rakhate na chaile):
+    SSH key diye-o push kora jay:
+      ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+      cat ~/.ssh/id_ed25519.pub
+      #  --> GitHub -> Settings -> SSH and GPG keys -> New SSH key
+      git remote set-url origin git@github.com:ashrafulunisoft/test_ci_cd.git
+      git push origin main    # ekhon PAT o lagbe na
+
+
+----------------------------------------------------------------
+3.1  VPS SETUP  (one-time)
+----------------------------------------------------------------
+  ssh ai_root@<VPS_IP>
+
+  # Apache install
+  sudo apt update
+  sudo apt install -y apache2
+  sudo systemctl status apache2      # "active (running)" hote hobe
+  curl localhost                     # "Apache2 Ubuntu Default Page" asbe
+
+  # Web root writable by deploy user
+  sudo chown -R $USER:$USER /var/www/html
+
+
+----------------------------------------------------------------
+3.2  GENERATE SSH KEY FOR GITHUB ACTIONS
+----------------------------------------------------------------
+  # Generate key pair  (passphrase: empty, just press Enter)
+  ssh-keygen -t ed25519 \
+    -f ~/.ssh/github_actions \
+    -N "" \
+    -C "github-actions-deploy"
+
+  # Authorize the public key
+  cat ~/.ssh/github_actions.pub >> ~/.ssh/authorized_keys
+  chmod 600 ~/.ssh/authorized_keys
+
+  # Files created:
+  #   ~/.ssh/github_actions      <-- PRIVATE  (jabe GitHub secret e)
+  #   ~/.ssh/github_actions.pub  <-- PUBLIC   (VPS e thakbe)
+
+  # Private key ta dekho (GitHub secret e lagbe):
+  cat ~/.ssh/github_actions
+  # --> Puro output copy koro, BEGIN theke END porjonto "Full Key Copy ---Begin *** 
+
+  # Local test (optional, nijer VPS e-i):
+  ssh -i ~/.ssh/github_actions $USER@localhost
+  # Successful login hole key thik ase; "exit" diye ber hoye jaao
+
+
+----------------------------------------------------------------
+3.3  GITHUB SECRETS  (browser theke)
+----------------------------------------------------------------
+  URL:
+    https://github.com/ashrafulunisoft/test_ci_cd/settings/secrets/actions
+
+  Settings -> Secrets and variables -> Actions -> "New repository secret"
+  -- ei 3 ta secret add koro:
+
+  +------------------+--------------------------------------------+
+  |  Secret name     |  Value                                     |
+  +------------------+--------------------------------------------+
+  |  VPS_HOST        |  VPS public IP (e.g. 203.0.113.50)         |
+  |  VPS_USER        |  SSH user (e.g. ai_root)                   |
+  |  VPS_SSH_KEY     |  Full private key (BEGIN line theke END)   |
+  +------------------+--------------------------------------------+
+
+  Name case-sensitive. Private key MUST include -----BEGIN/-----END
+  marker dui-tai.
+
+
+----------------------------------------------------------------
+3.4  GITHUB ACTIONS WORKFLOW
+----------------------------------------------------------------
+  File: .github/workflows/deploy.yml
+
+  name: Deploy to VPS
+
+  on:
+    push:
+      branches: [main]
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Copy index.html to VPS
+          uses: appleboy/scp-action@v0.1.7
+          with:
+            host: ${{ secrets.VPS_HOST }}
+            username: ${{ secrets.VPS_USER }}
+            key: ${{ secrets.VPS_SSH_KEY }}
+            source: index.html
+            target: /var/www/html
+            overwrite: true
+
+
+----------------------------------------------------------------
+3.5  FIRST PUSH
+----------------------------------------------------------------
+  cd /path/to/test_ci_cd
+  git add index.html .github/workflows/deploy.yml
+  git commit -m "Add index.html and deploy workflow"
+  git push origin main
+
+  Then watch:
+    https://github.com/ashrafulunisoft/test_ci_cd/actions
+
+  Green checkmark howar por browser e http://VPS_IP khola -- page live!
+
+
+========================================================================
+4. BUGS HIT & FIXES  (debugging log)
+========================================================================
+
+----------------------------------------------------------------
+BUG #1  -- "can't connect without a private SSH key or password"
+----------------------------------------------------------------
+  WHEN   : First run
+  ERROR  : error: can't connect without a private SSH key or password
+  CAUSE  : deploy.yml e duita alada secret name chilo:
+             appleboy/ssh-action  -> ${{ secrets.VPS_SSH_KEY }}
+             appleboy/scp-action  -> ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+           but GitHub e shudhu VPS_SSH_KEY add kora chilo.
+           Second step er secret empty chil-o, ssh-action tar pore
+           empty value niye fail kore.
+  FIX    :
+    1. Ekta secret name e consistency ano (workflow + GitHub).
+    2. Naam exact same rakho.
+    3. "cleanup" ssh-step ta remove koro -- scp nijei overwrite
+       kore (jodi overwrite: true deoa thake).
+
+
+----------------------------------------------------------------
+BUG #2  -- "ssh: handshake failed: unable to authenticate"
+----------------------------------------------------------------
+  WHEN   : Bug #1 fix korar por
+  ERROR  : ssh: handshake failed: ssh: unable to authenticate,
+           attempted methods [none publickey],
+           no supported methods remain
+  CAUSE  : Key pair MISMATCH.
+           Security discussion e ekta private key chat e share
+           hoye gechilo -> VPS e NEW key generate kora holo,
+           kintu GitHub e secret (VPS_SSH_KEY) ta PURANO private
+           key diye-i chilo. Tai VPS er notun public key er
+           sathe kono match-i holo na.
+  FIX    : Puro key pair notun kore generate koro, tarpor
+           GitHub secret o update koro.
+
+            # on VPS -- full clean
+            sed -i '/github-actions-deploy/d' ~/.ssh/authorized_keys
+            rm -f ~/.ssh/github_actions ~/.ssh/github_actions.pub
+            ssh-keygen -t ed25519 \
+              -f ~/.ssh/github_actions \
+              -N "" -C "github-actions-deploy"
+            cat ~/.ssh/github_actions.pub >> ~/.ssh/authorized_keys
+            chmod 600 ~/.ssh/authorized_keys
+
+            # browser -- VPS_SSH_KEY secret UPDATE
+            #   new `cat ~/.ssh/github_actions` output paste koro
+
+  LESSON : Key regenerate korle GitHub secret-o SAME sitting-e
+           update korte hobe. Otherwise pair out of sync thake.
+
+
+----------------------------------------------------------------
+BUG #3  -- "Cannot open: File exists"
+----------------------------------------------------------------
+  WHEN   : Bug #2 fix korar por
+  ERROR  : error: tar: index.html: Cannot open: File exists
+  CAUSE  : appleboy/scp-action er default overwrite: false
+           mane already-existing file hole skip kore / error
+           dey. /var/www/html/index.html (Apache default page)
+           already chilo, tai overwrite korte parchilo na.
+  FIX    : Workflow e explicit overwrite allow koro:
+             overwrite: true
+           (Final deploy.yml e add kora ase, dekho 3.4)
+
+
+----------------------------------------------------------------
+BUG #4  -- "Cannot open: Permission denied"
+----------------------------------------------------------------
+  WHEN   : Bug #3 fix korar por (overwrite: true add kore push)
+  ERROR  : error: tar: index.html: Cannot open: Permission denied
+  CAUSE  : /var/www/html directory-tai root er owned chilo
+           (Apache er default). ai_root er write permission
+           chilo na. Overwrite korte parbe na even after
+           overwrite: true.
+  FIX    : VPS e:
+             sudo chown -R ai_root:ai_root /var/www/html
+             rm -f /var/www/html/index.html
+           (Directory er ownership niye ai_root nicher file
+           gulo delete / overwrite korte parbe.)
+
+  LESSON : Deploy user ke target directory-r owner hote hobe
+           ba write permission thakte hobe. Eta ke "deploy
+           user" pattern bole.
+
+
+========================================================================
+5. FINAL FILES
+========================================================================
+
+-- .github/workflows/deploy.yml --
+  name: Deploy to VPS
+  on:
+    push:
+      branches: [main]
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: appleboy/scp-action@v0.1.7
+          with:
+            host: ${{ secrets.VPS_HOST }}
+            username: ${{ secrets.VPS_USER }}
+            key: ${{ secrets.VPS_SSH_KEY }}
+            source: index.html
+            target: /var/www/html
+            overwrite: true
+
+-- index.html (example) --
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>CI/CD Test - test_ci_cd</title>
+      <style>
+        body { font-family: system-ui; min-height: 100vh; display:flex;
+               align-items:center; justify-content:center;
+               background: linear-gradient(135deg,#0f172a,#1e293b);
+               color:#e2e8f0; }
+        .card { padding:3rem 4rem; background:rgba(255,255,255,.05);
+                border:1px solid rgba(255,255,255,.1); border-radius:16px;
+                text-align:center; }
+        .badge { display:inline-block; margin-top:1.5rem; padding:.4rem 1rem;
+                 border-radius:999px; background:#065f46; color:#6ee7b7; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1>🚀 Hello from my VPS!</h1>
+        <p>This page was deployed automatically by GitHub Actions.</p>
+        <span class="badge">Deploy #N -- edit me and push again!</span>
+      </div>
+    </body>
+  </html>
+
+
+========================================================================
+6. DAILY COMMANDS CHEAT SHEET
+========================================================================
+
+-- Deploy a change --
+  cd /path/to/test_ci_cd
+  # edit files...
+  git add .
+  git commit -m "describe your change"
+  git push origin main
+  # Actions tab e dekho -> ~30s e browser e update
+
+-- Inspect VPS state --
+  ssh ai_root@<VPS_IP>
+  ls -la /var/www/html/
+  cat /var/www/html/index.html
+
+-- Verify deploy key still works --
+  ssh -i ~/.ssh/github_actions $USER@localhost
+  # login hole key thik ase; "exit" diye ber hoye jaao
+
+-- Inspect / rotate deploy key --
+  cat ~/.ssh/github_actions         # private
+  cat ~/.ssh/github_actions.pub     # public
+  cat ~/.ssh/authorized_keys        # all authorized public keys
+
+-- Apache trouble? --
+  sudo systemctl status apache2
+  sudo systemctl restart apache2
+  sudo tail -f /var/log/apache2/error.log
+
+
+========================================================================
+7. SECURITY LESSONS LEARNED
+========================================================================
+
+  1. PRIVATE KEY NEVER SHARE KORO
+     Chat, screenshot, public repo, ba even private repo
+     jekhane oi key onno jaigaeo use hoche -- lekhao na.
+     Leak hole assume koro COMPROMISED -- key regenerate
+     koro ar joto system e chilo shob jaigae update koro.
+
+  2. EK SECRET NAME, EVERYWHERE
+     Workflow e ${{ secrets.X }} ar GitHub Settings e name
+     EXACTLY match korte hobe. Case-sensitive.
+
+  3. DEPLOY USER MINIMAL PRIVILEGE
+     Practice e root/ai_root chole geleo, real production e
+     alada "deploy" user banano better -- sudo chara, shudhu
+     /var/www/html e write access. Apache www-data hisebe
+     cholbe, deploy alada thakbe.
+
+  4. PUBLIC/PRIVATE PAIR SYNC
+     VPS e key rotate korle SAME sitting-e GitHub secret
+     o update korte hobe. Nahole deploy suddenly break hobe
+     ar karon bujhte somoy lagbe.
+
+
+========================================================================
+8. NEXT STEPS / IMPROVEMENTS
+========================================================================
+
+  • Multi-file deploy: source: "."  +  rm: true
+      (full project copy, na thakle remote file delete kore)
+
+  • Apache reload step (config change hole):
+      - uses: appleboy/ssh-action@v1
+        with: { host: ..., script: sudo systemctl reload apache2 }
+
+  • Staging environment: notun branch "staging" er jonno
+    alada workflow -- target: /var/www/staging
+
+  • Self-hosted runner on VPS (build heavy hole):
+    GitHub repo -> Settings -> Actions -> Runners -> New self-hosted
+
+  • Smoke test after deploy:
+      - name: Verify page
+        run: curl -fsS http://${{ secrets.VPS_HOST }} | grep "Hello"
+
+  • HTTPS (production): Let's Encrypt + Certbot
+      sudo apt install -y certbot python3-certbot-apache
+      sudo certbot --apache -d yourdomain.com
+
+  • Branch protection: main branch e direct push block,
+    pull request review lagbe.
+
+
+========================================================================
+END OF NOTE
+========================================================================
